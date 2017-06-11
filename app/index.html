@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Automatic File Transfer</title>
+  </head>
+  <body>
+    <h1>
+    <button class="close" onclick="closeWindow()">Close</button>
+    <p>Click the button to select a Folder.</p>
+    <div class="row">
+      <input type="file" multiple webkitdirectory id="fileURL"/>
+      <ul id="fileOutput"></ul>
+    </div>
+     <div class="row">
+      <input type="file" multiple webkitdirectory id="secondFileURL"/>
+      <ul id="secondFileOutput"></ul>
+    </div>
+  </body>
+    <script src="js/jquery-2.1.3.js"></script>
+    <script src="bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="js/index.js"></script>
+  </body>
+</html>

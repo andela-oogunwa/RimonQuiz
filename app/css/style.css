@@ -1,0 +1,20 @@
+html,
+body {
+    background: #044D7F;
+    overflow: hidden;
+    -webkit-app-region: no-drag;
+    -webkit-user-select: none;
+}
+
+.close {
+    cursor: pointer;
+    display: inline-block;
+    height: 32px;
+    position: absolute;
+    text-indent: -10000px;
+    top: 6px;
+    width: 32px;
+    z-index: 1;
+    color: red;
+    -webkit-app-region: no-drag;
+}

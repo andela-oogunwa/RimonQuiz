@@ -1,0 +1,19 @@
+{
+  "name": "file-movement",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./main.js",
+  "dependencies": {
+    "bootstrap": "^3.3.7",
+    "ncp": "^2.0.0",
+    "pretty-bytes": "^2.0.1"
+  },
+  "devDependencies": {
+    "electron-prebuilt": "^0.35.6"
+  },
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "",
+  "license": "ISC"
+}
