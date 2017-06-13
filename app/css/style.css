@@ -16,5 +16,10 @@ body {
     width: 32px;
     z-index: 1;
     color: red;
+    float: right;
     -webkit-app-region: no-drag;
+}
+
+.row{
+    cursor:pointer;
 }

@@ -4,14 +4,15 @@ var app = require('app');
 var BrowserWindow = require('browser-window');
 
 var mainWindow = null;
-var ipc = require('ipc');
+var ipc = require('electron').ipcMain;
+
 
 app.on('ready', function() {
     mainWindow = new BrowserWindow({
         frame: false,
         height: 700,
         resizable: false,
-        width:   1100 });
+        width:   700 });
 
-    mainWindow.loadUrl('file://' + __dirname + '/app/index.html');
+    mainWindow.loadURL('file://' + __dirname + '/app/index.html');
 });
