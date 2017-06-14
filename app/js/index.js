@@ -2,11 +2,7 @@
 'use strict';
 var ipc = require('electron').ipcMain;
 var closeEl = document.querySelector('.close');
-
-/*(function closeWindow(){
-	mainWindow.close();
-})()*/
-
+var mv = require('mv');
 
 
 var _getAllFilesFromFolder = function(dir) {
@@ -15,32 +11,49 @@ var _getAllFilesFromFolder = function(dir) {
     var results = [];
 
     filesystem.readdirSync(dir).forEach(function(file) {
-    	// console.log(file);
+        console.log(file);
+        console.log(dir);
 
-        file = dir+'/'+file;
-        var stat = filesystem.statSync(file);
+       // file = file.replace(/ /g, "^ ");
+        var index = file.indexOf(" ");
+        var path =  index < 0 ? dir + "\\" + file : "\"" + dir + "\\" + insert(file, index, "\"");
+
         var now = new Date();
+        var stat = filesystem.existsSync(path)
         var modified = new Date(stat.mtime);
 
         var diff = now - modified;
 
-        if(diff > 172800000) {
+       // if(diff > 172800000) {
         	results.push(file);
-        }
+        //}
 
     });
+
+    console.log("### results :" + results);
 
     return results;
                   
 };
 
+function insert(str, index, value) {
+    return str.substr(0, index) + value + str.substr(index);
+}
 
-function moveFile(filePath, destPath){
+
+function moveFile(srcPath, fileName, destPath){
 	console.log(destPath);
-   var object = new ActiveXObject("Scripting.FileSystemObject");
-   var file = object.GetFile(filePath);
-   file.Move(destPath);
-   console.log("File is moved successfully");
+  console.log(fileName);
+  console.log(srcPath);
+
+  mv(srcPath + "\\" + fileName, destPath + "\\" + fileName, function(err) {
+      if(err) {
+        console.log("Transfer failed : " + err);
+      } else {
+        console.log("done!");
+      }
+  });
+   
 }
 
 //function to select file or folder source
@@ -73,15 +86,17 @@ function moveFile(filePath, destPath){
 
                 console.log(e);
                 destPath = e.target.files[0].path;
+                console.log("dest path : " + destPath);
             }, false);
 
 
-            buttonEle.addEventListener("change", function(e) {
+            buttonEle.addEventListener("click", function(e) {
               	e.preventDefault();
+              	console.log('calling function');
               	if(destPath != null && srcPath!= null) {
 	             	if(movingFiles.length) {
 	             		movingFiles.forEach(function(file) {
-		             		moveFile(file, destPath);
+		             		moveFile(srcPath, file, destPath);
 		             	});
 	             	}
              	}

@@ -6,13 +6,13 @@ var BrowserWindow = require('browser-window');
 var mainWindow = null;
 var ipc = require('electron').ipcMain;
 
-
 app.on('ready', function() {
     mainWindow = new BrowserWindow({
         frame: false,
-        height: 700,
+        height: 450,
         resizable: false,
-        width:   700 });
+        width:   350 });
 
     mainWindow.loadURL('file://' + __dirname + '/app/index.html');
 });
+
