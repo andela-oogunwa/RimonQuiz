@@ -8,18 +8,32 @@
   </head>
   <body>
     <div>
-      <button id="close">Close</button>
+      <div class="arrange">
+        <button id="close">Close</button>
+      </div>
+      <p>Click the button to select a Folder.</p>
+      <div class="row">
+        Source Folder:<span><input type="file" multiple webkitdirectory id="fileURL"/></span>
+        <ul id="fileOutput"></ul>
+      </div>
+       <div class="row">
+        Destination Folder:<input type="file" multiple webkitdirectory id="secondFileURL"/>
+        <ul id="secondFileOutput"></ul>
+      </div>
+      <div> Remove file(s) with last modified date(s) more than: 
+        <input type="radio" name="modify" value="90" checked="true"> 1 hour<br>
+        <input type="radio" name="modify" value="90" checked="true"> 30 days<br>
+        <input type="radio" name="modify" value="60">60 days<br>
+        <input type="radio" name="modify" value="30"> 90days
+      </div>
+      <div> Run this program every:
+        <input type="radio" name="schedule" value="300" checked="true"> 5 Minute<br>
+        <input type="radio" name="schedule" value="2419200"> 30 days<br>
+        <input type="radio" name="schedule" value="7257600"> 90 days<br>
+        <input type="radio" name="schedule" value="9676800"> 120 days<br>
+      </div>
+      <button id="moveFile">Click here</button>
     </div>
-    <p>Click the button to select a Folder.</p>
-    <div class="row">
-      <input type="file" multiple webkitdirectory id="fileURL"/>
-      <ul id="fileOutput"></ul>
-    </div>
-     <div class="row">
-      <input type="file" multiple webkitdirectory id="secondFileURL"/>
-      <ul id="secondFileOutput"></ul>
-    </div>
-    <button id="moveFile">Click here</button>
   </body>
     <script src="js/jquery-2.1.3.js"></script>
     <script>window.jQuery = window.$ = module.exports</script>

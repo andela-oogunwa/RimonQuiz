@@ -1,13 +1,42 @@
 
 'use strict';
+var filesystem = require("fs");
+var path = require('path');
 var ipc = require('electron').ipcMain;
-var closeEl = document.querySelector('.close');
-var mv = require('mv');
+var remote = require('electron').remote;
 
+(function() {
+  var closeEl = document.querySelector('.close');
+  var files;
+  var file;
+  var extension;
+  var srcPath;
+  var destPath;
+  var movingFiles;
+  var input = document.getElementById("fileURL");
+  var secondInput = document.getElementById("secondFileURL");
+  var output = document.getElementById("fileOutput");
+  var buttonEle = document.getElementById("moveFile");
+  var savedFilesPath = { }
+  var path_to_read = path.resolve(__dirname, "../files_path.json")
+  var elapsed_time = document.querySelector('input[name=schedule]:checked').value
+  var buttonClose = document.getElementById('close')
 
-var _getAllFilesFromFolder = function(dir) {
+  setInterval(function(){
+    var data = filesystem.readFileSync(path_to_read, 'utf-8')
+    var filesPath = JSON.parse(data)
+    if(filesPath && filesPath.length > 0) {
+      console.log('showing json files:')
+      filesPath.forEach(function(file){
+        var files_to_move = _getAllFilesFromFolder(file.srcPath)
+        moveFiles(files_to_move, file.srcPath, file.destPath)
+      })
+    }
+  },
+    1000 * Number(elapsed_time)
+  )
 
-    var filesystem = require("fs");
+  var _getAllFilesFromFolder = function(dir) {
     var results = [];
 
     filesystem.readdirSync(dir).forEach(function(file) {
@@ -25,84 +54,78 @@ var _getAllFilesFromFolder = function(dir) {
         var diff = now - modified;
 
        // if(diff > 172800000) {
-        	results.push(file);
+          results.push(file);
         //}
 
     });
-
     console.log("### results :" + results);
-
     return results;
-                  
-};
+  };
 
-function insert(str, index, value) {
+
+  function insert(str, index, value) {
     return str.substr(0, index) + value + str.substr(index);
-}
+  }
 
-
-function moveFile(srcPath, fileName, destPath){
-	console.log(destPath);
-  console.log(fileName);
-  console.log(srcPath);
-
-  mv(srcPath + "\\" + fileName, destPath + "\\" + fileName, function(err) {
-      if(err) {
-        console.log("Transfer failed : " + err);
-      } else {
-        console.log("done!");
+  function moveFiles(files_to_move, src, dest) {
+    var mv = require('mv');
+    if(dest != null && src!= null) {
+      if(files_to_move.length) {
+        files_to_move.forEach(function(file) {
+          // moveFile(srcPath, file, destPath);
+          mv(src + "\\" + file, dest + "\\" + file, function(err) {
+              if(err) {
+                console.log("Transfer failed : " + err);
+              } else {
+                console.log("done!");
+              }
+          });
+        });
       }
-  });
-   
-}
+    }
+  }
 
-//function to select file or folder source
-(function(){
-            var files, 
-                file, 
-                extension,
-                srcPath,
-                destPath,
-                movingFiles,
-                input = document.getElementById("fileURL"), 
-                secondInput = document.getElementById("secondFileURL"),
-                output = document.getElementById("fileOutput"),
-                buttonEle = document.getElementById("moveFile");
-            
-            input.addEventListener("change", function(e) {
-                files = e.target.files;
-                output.innerHTML = "";
+  function moveOnClick(files_to_move) {
+    console.log('files_to_move:', files_to_move)
+    moveFiles(files_to_move, srcPath, destPath)
+    try{
+      filesystem.writeFileSync(path_to_read, JSON.stringify([savedFilesPath]), 'utf-8')
+    }catch(e) {
+      throw e
+    }
+  }
 
-                console.log(e);
-                srcPath = e.target.files[0].path;
+  //function to select file or folder source
 
-                movingFiles = _getAllFilesFromFolder(srcPath);
-                console.log(movingFiles);
-            }, false);
+  input.addEventListener("change", function(e) {
+    files = e.target.files;
+    output.innerHTML = "";
 
-             secondInput.addEventListener("change", function(e) {
-                files = e.target.files;
-                output.innerHTML = "";
+    console.log(e);
+    srcPath = e.target.files[0].path;
+    savedFilesPath.srcPath = srcPath
+    // console.log(movingFiles);
+  }, false);
 
-                console.log(e);
-                destPath = e.target.files[0].path;
-                console.log("dest path : " + destPath);
-            }, false);
+  secondInput.addEventListener("change", function(e) {
+    files = e.target.files;
+    output.innerHTML = "";
+
+    console.log(e);
+    destPath = e.target.files[0].path;
+    savedFilesPath.destPath = destPath
+    console.log("dest path : " + destPath);
+  }, false);
 
 
-            buttonEle.addEventListener("click", function(e) {
-              	e.preventDefault();
-              	console.log('calling function');
-              	if(destPath != null && srcPath!= null) {
-	             	if(movingFiles.length) {
-	             		movingFiles.forEach(function(file) {
-		             		moveFile(srcPath, file, destPath);
-		             	});
-	             	}
-             	}
-            })
+  buttonEle.addEventListener("click", function(e) {
+   e.preventDefault(); 
+    console.log('calling function');
+    moveOnClick(_getAllFilesFromFolder(srcPath));
+  })
 
-             
-})();
-
-
+  buttonClose.addEventListener("click", function (e){
+    e.preventDefault();
+    remote.getCurrentWindow().close()
+  })
+}())
