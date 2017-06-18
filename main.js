@@ -1,11 +1,12 @@
 'use strict';
 
-var app = require('app');
-var BrowserWindow = require('browser-window');
+var electron = require('electron');
+var app = electron.app;
+var BrowserWindow = electron.BrowserWindow;
 
 var mainWindow = null;
 var backgroundWindow = null
-var ipc = require('electron').ipcMain;
+var ipc = electron.ipcMain;
 
 ipc.on('close-main-window', function () {
     app.quit();

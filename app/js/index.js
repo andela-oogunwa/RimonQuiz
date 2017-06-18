@@ -6,6 +6,7 @@ var ipc = require('electron').ipcMain;
 var remote = require('electron').remote;
 var mv = require('mv');
 var fs = require('fs.extra');
+var async = require('async');
 
 (function() {
   var closeEl = document.querySelector('.close');
@@ -48,35 +49,36 @@ function schedule() {
   }
   if (!srcPath && !destPath) return;
   interval = setInterval(function(){
-    if (shouldMoveFolder(srcPath)) {
+    if (getFolders(srcPath)) {
       moveOnClick(srcPath);
     }
   }, 1000 * Number(elapsed_time))
 }
-  var shouldMoveFolder = function(dir) {
+
+
+  var getFolders = function(dir) {
+    var folders = [];
     var maxTime = thresholdDate()
     // return false;
     // var shouldMove = true;
-    var shouldMove = filesystem.readdirSync(dir).every(function(file) {
+    console.log(filesystem.readdirSync(dir))
+    filesystem.readdirSync(dir).map(function(file) {
         console.log(file);
         
-// 
        // file = file.replace(/ /g, "^ ");
         var index = file.indexOf(" ");
         // var path =  index < 0 ? dir + "\\" + file : "\"" + dir + "\\" + insert(file, index, "\"");
         var path =  dir + "\\" + file;
-        console.log("two");
         // var now = new Date();
         //var stat = filesystem.existsSync(path)
-        var stat = filesystem.statSync(path)
-        console.log("three")
-        //var modified = new Date(stat.mtime);
-        //console.log(stat, path)
+        var stat = filesystem.statSync(path);
+        console.log(stat);
 
-        return Date.now() - maxTime > stat.mtime;
-    });
-    console.log(shouldMove);
-    return shouldMove;
+        if (stat.isDirectory() && (Date.now() - maxTime > stat.mtime)) {
+          folders.push(path)
+        }
+    })
+    return folders;
   };
 
   function thresholdDate() {
@@ -120,31 +122,61 @@ function schedule() {
       }
   }*/
 
-  function moveFolder(dir_to_move, dest) {
-    if(dest != null && dir_to_move!= null) {
-      // var newDest = dest.split('/')
-      //var newDest = dest + String(Date.now())
-      var splitted = dir_to_move.split(path.sep);
+  // function moveFolder(dir_to_move, dest) {
+  //   if(dest != null && dir_to_move!= null) {
+  //     // var newDest = dest.split('/')
+  //     //var newDest = dest + String(Date.now())
+  //     var splitted = dir_to_move.split(path.sep);
+  //     var newDest = path.join(dest, splitted[splitted.length-1]);
+  //     console.log(newDest)
+  //     fs.move(dir_to_move, newDest , function(err) {
+  //       // done. it first created all the necessary directories, and then 
+  //       // tried fs.rename, then falls back to using ncp to copy the dir 
+  //       // to dest and then rimraf to remove the source dir 
+  //     if (err) {
+  //       console.log("failed! : " + err);
+  //     } else {
+  //       console.log("done!");
+  //       alert("FOLDER MOVED SUCCESSFULLY!")
+  //     }
+        
+  //     });
+  //     }
+  // }
+
+  function moveFolder(folders, dest) {
+    if (!dest) return alert("Destination not selected");
+    async.each(folders, function(filePath) {
+      var splitted = filePath.split(path.sep);
       var newDest = path.join(dest, splitted[splitted.length-1]);
-      console.log(newDest)
-      fs.move(dir_to_move, newDest , function(err) {
-        // done. it first created all the necessary directories, and then 
-        // tried fs.rename, then falls back to using ncp to copy the dir 
-        // to dest and then rimraf to remove the source dir 
-      if (err) {
-        console.log("failed! : " + err);
+      console.log(newDest);
+      fs.move(filePath, newDest , function(err) {
+          // done. it first created all the necessary directories, and then 
+          // tried fs.rename, then falls back to using ncp to copy the dir 
+          // to dest and then rimraf to remove the source dir 
+          if (err) {
+            console.log("failed! : " + err);
+          } else {
+            console.log("done!");
+            if (folders.indexOf(filePath) === folders.length-1) { // last file
+              alert("FOLDER(S) MOVED SUCCESSFULLY!")
+            }
+            
+          }
+      });
+    }, function(e) {
+      console.log(e)
+      if (e) {
+        alert("Error occured when moving")
       } else {
-        console.log("done!");
         alert("FOLDER MOVED SUCCESSFULLY!")
       }
-        
-      });
-      }
+    })
   }
 
-  function moveOnClick(dir_to_move) {
-    console.log('folder_to_move:' + dir_to_move);
-    moveFolder(dir_to_move, destPath);
+  function moveOnClick(dirs_to_move) {
+    console.log('folders_to_move:' + dirs_to_move);
+    moveFolder(dirs_to_move, destPath);
     try{
       filesystem.writeFileSync(path_to_read, JSON.stringify([savedFilesPath]), 'utf-8')
     }catch(e) {
@@ -178,11 +210,12 @@ function schedule() {
   buttonEle.addEventListener("click", function(e) {
    e.preventDefault(); 
     console.log('calling function');
-    if (shouldMoveFolder(srcPath)) {
+    var folders = getFolders(srcPath)
+    if (folders.length) {
       console.info("yeah correct")
-      moveOnClick(srcPath); 
+      moveOnClick(folders); 
     } else {
-      alert("THE FILE(S) IN THE FOLDER DO(ES) NOT MEET THE REQUIREMENT!");
+      alert("NO FOLDER MATCHES THE REQUIREMENT!");
       console.error("OOOOPSSS!")
     }
     
